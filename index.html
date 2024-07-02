@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Load React Components with Web Workers</title>
+  </head>
+  <body>
+    <div id="root1"></div>
+    <div id="root2"></div>
+
+    <!-- Import Comlink from CDN -->
+    <script src="https://unpkg.com/comlink/dist/umd/comlink.js"></script>
+
+    <!-- Main script -->
+    <script>
+      async function loadComponent(workerScript, rootId) {
+        const root = document.getElementById(rootId);
+        root.innerHTML = "Loading..."; // Loading indicator
+
+        try {
+          const worker = new Worker(workerScript);
+          const { renderComponent } = Comlink.wrap(worker);
+          const html = await renderComponent();
+          root.innerHTML = html;
+          worker.terminate();
+        } catch (error) {
+          console.error(`Error loading component: ${error}`);
+          root.innerHTML = "Error loading component";
+        }
+      }
+
+      // Load components
+      loadComponent("./public/hello1.worker.js", "root1");
+      loadComponent("./public/hello2.worker.js", "root2");
+    </script>
+  </body>
+</html>
